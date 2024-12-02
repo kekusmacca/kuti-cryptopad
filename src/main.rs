@@ -96,7 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 // invoke popup window asking for passkey
                 let handle_copy = ui_handle.clone();
-                let _ = slint::invoke_from_event_loop(move || handle_copy.unwrap().invoke_show_popup());
+                let _ = slint::invoke_from_event_loop(move || handle_copy.unwrap().invoke_show_popup_open());
             }          
         }
     });
