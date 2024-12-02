@@ -4,6 +4,7 @@ import { Button, VerticalBox, TextEdit, LineEdit, HorizontalBox } from "std-widg
 export enum FileStreamState { none, new, save_current, save_as, open }
 
 export component AppWindow inherits Window {
+    title: "Kuti CryptoPad";
     in-out property <string> status: "Ready";
     in-out property <string> file_path: "";
     property <string> pass_key: "";

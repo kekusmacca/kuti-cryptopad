@@ -2383,6 +2383,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "kuti-cryptopad"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "base64 0.13.1",
+ "cipher",
+ "ctr",
+ "hmac",
+ "native-dialog",
+ "pbkdf2",
+ "rand",
+ "sha2",
+ "slint",
+ "slint-build",
+]
+
+[[package]]
 name = "lazy-bytes-cast"
 version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2991,23 +3008,6 @@ name = "parking"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
-
-[[package]]
-name = "pass-protect"
-version = "0.1.0"
-dependencies = [
- "aes",
- "base64 0.13.1",
- "cipher",
- "ctr",
- "hmac",
- "native-dialog",
- "pbkdf2",
- "rand",
- "sha2",
- "slint",
- "slint-build",
-]
 
 [[package]]
 name = "password-hash"
