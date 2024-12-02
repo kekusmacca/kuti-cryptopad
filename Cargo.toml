@@ -1,0 +1,30 @@
+[package]
+name = "kuti-cryptopad"
+version = "0.1.0"
+edition = "2024"
+authors = ["Kekus Macca"]
+description = "A cryptographic notepad application."
+license = "MIT"
+repository = "https://github.com/yourusername/kuti-cryptopad"
+homepage = "https://github.com/yourusername/kuti-cryptopad"
+documentation = "https://github.com/yourusername/kuti-cryptopad"
+keywords = ["cryptography", "notepad", "encryption"]
+categories = ["cryptography", "applications"]
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+slint = "1.8.0"
+aes = "0.8"
+base64 = "0.13"
+ctr = "0.9"
+cipher = "0.4"
+rand = "0.8"
+pbkdf2 = "0.10"
+hmac = "0.12"
+sha2 = "0.10"
+native-dialog = "0.7.0"
+
+[build-dependencies]
+slint-build = "1.8.0"
