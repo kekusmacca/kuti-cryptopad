@@ -9,6 +9,7 @@ use std::io::{self, Read, Write};
 use crypto::{encrypt, decrypt};
 use native_dialog::FileDialog;
 
+
 slint::include_modules!();
 
 
@@ -75,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    // TODO: Needs to display message if passkey is incorrect
+    
     ui.on_open_file_dialog({
         let ui_handle = ui.as_weak();
         move || {
@@ -96,7 +97,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 // invoke popup window asking for passkey
                 let handle_copy = ui_handle.clone();
-                let _ = slint::invoke_from_event_loop(move || handle_copy.unwrap().invoke_show_popup());
+                let _ = slint::invoke_from_event_loop(move || handle_copy.unwrap().invoke_show_popup_open());
             }          
         }
     });
@@ -113,11 +114,25 @@ fn main() -> Result<(), Box<dyn Error>> {
             // Read the encrypted contents from the file
             let encrypted_contents = read_file(&str_path).unwrap();
 
-            // Decrypt the contents
-            let decrypted_contents = decrypt(&encrypted_contents, &passkey);
+            // Try to decrypt the contents
+            match decrypt(&encrypted_contents, &passkey) {
+                Ok(decrypted_contents) => {
+                    // Handle the decrypted contents
+                    // Update the UI with the decrypted contents
+                    ui.set_contents(slint::SharedString::from(decrypted_contents));
+                    ui.set_bg_color(slint::Brush::from(slint::Color::from_rgb_u8(0, 63, 0)));
+                    ui.set_status(slint::SharedString::from("Opened"));
+                }
+                Err(e) => {
+                    // Handle the error
+                    ui.set_contents(slint::SharedString::from("ERROR: -  Failed to decrypt contents - \n Please try again"));
+                    ui.set_bg_color(slint::Brush::from(slint::Color::from_rgb_u8(63, 0, 0)));
+                    ui.set_status(slint::SharedString::from("Error"));
 
-            // Update the UI with the decrypted contents
-            ui.set_contents(slint::SharedString::from(decrypted_contents));
+                    eprintln!("ERROR: -  Failed to decrypt contents -  {:?}", e);
+                    
+                }
+            }
         }
     });
 

@@ -31,7 +31,7 @@ pub fn encrypt(text: &str, passkey: &str) -> String {
     encode(&result)
 }
 
-pub fn decrypt(encoded_text: &str, passkey: &str) -> String {
+pub fn decrypt(encoded_text: &str, passkey: &str) -> Result<String, Box<dyn std::error::Error>> {
     let buffer = decode(encoded_text).expect("Failed to decode base64");
     let (salt, rest) = buffer.split_at(16);
     let (iv, ciphertext) = rest.split_at(16);
@@ -40,10 +40,10 @@ pub fn decrypt(encoded_text: &str, passkey: &str) -> String {
     let mut decrypted_buffer = ciphertext.to_vec();
     cipher.apply_keystream(&mut decrypted_buffer);
     match String::from_utf8(decrypted_buffer) {
-        Ok(text) => text,
+        Ok(text) => Ok(text),
         Err(e) => {
-            eprintln!("Failed to convert to String: {:?}", e);
-            String::new()
+           // eprintln!("Failed to convert to String: {:?}", e);
+            Err(Box::new(e))
         }
     }
 }

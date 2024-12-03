@@ -3,6 +3,8 @@ import { Button, VerticalBox, TextEdit, LineEdit, HorizontalBox } from "std-widg
 // Define a custom enum
 export enum FileStreamState { none, new, save_current, save_as, open }
 
+
+
 export component AppWindow inherits Window {
     title: "Kuti CryptoPad";
     in-out property <string> status: "Ready";
@@ -10,7 +12,9 @@ export component AppWindow inherits Window {
     property <string> pass_key: "";
     in property <string> contents <=> txt_contents.text;
     property <FileStreamState> fs_state: none;
-   
+    property <string> key_result: "Wating for key match";
+    in-out property <brush> bg_color: #2b2b2b;
+    
     
     callback request-increase-value();
     callback open-file-dialog();
@@ -22,14 +26,26 @@ export component AppWindow inherits Window {
     width: 600px;
     height: 800px;
     padding: 10px;
+    background <=> bg_color;
+
     
     public function update_status(value: string) {
         status = value;
     }
 
-    public function show_popup(){
-        popup.show();
+    public function show_popup_open(){
+
+        popup_open.show();
     }
+
+    function is_match(pass_key1: string, pass_key2: string) -> bool {
+        if(pass_key1 == pass_key2 && pass_key1 != "" && pass_key2 != "") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     // Function to handle the file stream state
     // This function will be called when the user clicks on the save or open button
@@ -41,8 +57,10 @@ export component AppWindow inherits Window {
         }
     }
 
-    // TODO: Add another popup for passkey verfication on file create
-    popup := PopupWindow {   
+
+
+    // Popup for new passkey
+    popup_new := PopupWindow {
             height: 150px;
             width: 300px;
             x: (root.width - self.width) / 2;
@@ -52,32 +70,124 @@ export component AppWindow inherits Window {
             VerticalBox {
                 padding: 10px;
                 spacing: 10px;
+                
 
                 Text {
-                    text: "Enter Pass Key";
-                    font-size: 24px;
+                    text: "Enter New Pass Key";
+                    font-size: 18px;
                     color: white;
                 }
 
-                txt_passkey := LineEdit {
+                txt_passkey1 := LineEdit {
                     
                     text: "";
                     input-type: password;
                     
                     accepted => {
-                        root.pass_key = txt_passkey.text;
-                        root.handle_fs_state();
-                        popup.close();
-                        fs_state = FileStreamState.none;
+                        txt_passkey2.focus();
+                    }
+                    edited => {
+                        if (root.is_match(txt_passkey1.text, txt_passkey2.text) == false) {
+                            root.key_result = "Keys do not match";
+                        } else {
+                            root.key_result = "Keys match";
+                        }
                     }
                     
                 }
-
+                
+                txt_passkey2 := LineEdit {
+                    
+                    text: "";
+                    input-type: password;
+                    // TODO: Refactor accepted and OK Clicked
+                    accepted => {
+                        
+                        if (root.is_match(txt_passkey1.text, txt_passkey2.text) == true) {
+                            root.pass_key = txt_passkey2.text;
+                            root.handle_fs_state();
+                            popup_new.close();
+                            fs_state = FileStreamState.none;
+                        } else {
+                            root.key_result = "Keys do not match";
+                        }
+                    }
+                    edited => {
+                        if (root.is_match(txt_passkey1.text, txt_passkey2.text) == false) {
+                            root.key_result = "Keys do not match";
+                        } else {
+                            root.key_result = "Keys match";
+                        }
+                    }
+                }
                 HorizontalBox {
                     Button { 
                         text: "Cancel"; 
                         clicked => { 
-                            popup.close();
+                            popup_new.close();
+                            fs_state = FileStreamState.none;
+                        }
+                    }
+                    Button { 
+                        text: "OK"; 
+                        clicked => { 
+                            if (root.is_match(txt_passkey1.text, txt_passkey2.text) == true) {
+                                root.pass_key = txt_passkey2.text;
+                                root.handle_fs_state();
+                                popup_new.close();
+                                fs_state = FileStreamState.none;
+                            } else {
+                                root.key_result = "Keys do not match";
+                            }
+                        }
+                }      
+            }  
+            txt_reult := Text {
+                text: root.key_result;
+            }  
+        }
+    }
+            
+    
+    // Popup for save as dialog
+    popup_open := PopupWindow {
+        height: 150px;
+            width: 300px;
+            x: (root.width - self.width) / 2;
+            y: (root.height - self.height) / 2;
+            close-on-click: false;
+            Rectangle { height:100%; width: 100%; background:#292a2b; border-width: 1px; border-color: #691313;}
+            VerticalBox {
+                padding: 10px;
+                spacing: 10px;
+                
+
+                Text {
+                    text: "Enter Pass Key";
+                    font-size: 18px;
+                    color: white;
+                }
+
+                
+                txt_passkey := LineEdit {
+                    
+                    text: "";
+                    input-type: password;
+                    
+                    // TODO: Refactor accepted and OK Clicked
+                    accepted => {
+                            root.pass_key = txt_passkey.text;
+                            root.handle_fs_state();
+                            popup_open.close();
+                            fs_state = FileStreamState.none;
+                    }
+                    
+                }
+                HorizontalBox {
+                    Button { 
+                        text: "Cancel"; 
+                        clicked => { 
+                            popup_open.close();
                             fs_state = FileStreamState.none;
                         }
                     }
@@ -86,18 +196,20 @@ export component AppWindow inherits Window {
                         clicked => { 
                             root.pass_key = txt_passkey.text;
                             root.handle_fs_state();
-                            popup.close();
+                            popup_open.close();
                             fs_state = FileStreamState.none;
                         }
-                    }
-                }            
+                }     
+                
             }  
         }
-
+    }
     
-    VerticalBox {
+    
+        VerticalBox {
+            
         Text {
-            text: "Path: \{root.file_path}";
+            text: "Path: \{root.file_path}";  
         }
 
         Text {
@@ -105,32 +217,32 @@ export component AppWindow inherits Window {
         }
 
         HorizontalBox {
-        Button {
-            text: "Open";
-            clicked => {
-                root.fs_state = FileStreamState.open;
-                root.open-file-dialog();
+            Button {
+                text: "Open";
+                clicked => {
+                    root.fs_state = FileStreamState.open;
+                    root.open-file-dialog();
+                }
             }
-        }
-        Button {
-            text: "Save";
-            clicked => {
-                if(root.file_path == "") {
-                    fs_state = FileStreamState.save_as;
-                    popup.show();
-                } else {
-                    root.save-current(root.pass_key );
+            Button {
+                text: "Save";
+                clicked => {
+                    if(root.file_path == "") {
+                        fs_state = FileStreamState.save_as;
+                        popup_new.show();
+                    } else {
+                        root.save-current(root.pass_key );
+                    }
+                }
+            }
+            Button {
+                text: "Save As...";
+                clicked => {
+                    root.fs_state = FileStreamState.save_as;
+                    popup_new.show();
                 }
             }
         }
-        Button {
-            text: "Save As...";
-            clicked => {
-                root.fs_state = FileStreamState.save_as;
-                popup.show();
-            }
-        }
-    }
         txt_contents := TextEdit {
             font-size: 14px;
             edited => {
