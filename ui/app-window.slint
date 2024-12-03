@@ -3,6 +3,8 @@ import { Button, VerticalBox, TextEdit, LineEdit, HorizontalBox } from "std-widg
 // Define a custom enum
 export enum FileStreamState { none, new, save_current, save_as, open }
 
+
+
 export component AppWindow inherits Window {
     title: "Kuti CryptoPad";
     in-out property <string> status: "Ready";
@@ -11,6 +13,8 @@ export component AppWindow inherits Window {
     in property <string> contents <=> txt_contents.text;
     property <FileStreamState> fs_state: none;
     property <string> key_result: "Wating for key match";
+    in-out property <brush> bg_color: #2b2b2b;
+    
     
     callback request-increase-value();
     callback open-file-dialog();
@@ -22,6 +26,8 @@ export component AppWindow inherits Window {
     width: 600px;
     height: 800px;
     padding: 10px;
+    background <=> bg_color;
+
     
     public function update_status(value: string) {
         status = value;
@@ -50,6 +56,8 @@ export component AppWindow inherits Window {
             decrypt-contents(pass_key);
         }
     }
+
+
 
     // Popup for new passkey
     popup_new := PopupWindow {
@@ -156,6 +164,7 @@ export component AppWindow inherits Window {
             VerticalBox {
                 padding: 10px;
                 spacing: 10px;
+                
 
                 Text {
                     text: "Enter Pass Key";
@@ -202,8 +211,9 @@ export component AppWindow inherits Window {
     
     
         VerticalBox {
+            
         Text {
-            text: "Path: \{root.file_path}";
+            text: "Path: \{root.file_path}";  
         }
 
         Text {
@@ -211,32 +221,32 @@ export component AppWindow inherits Window {
         }
 
         HorizontalBox {
-        Button {
-            text: "Open";
-            clicked => {
-                root.fs_state = FileStreamState.open;
-                root.open-file-dialog();
+            Button {
+                text: "Open";
+                clicked => {
+                    root.fs_state = FileStreamState.open;
+                    root.open-file-dialog();
+                }
             }
-        }
-        Button {
-            text: "Save";
-            clicked => {
-                if(root.file_path == "") {
-                    fs_state = FileStreamState.save_as;
+            Button {
+                text: "Save";
+                clicked => {
+                    if(root.file_path == "") {
+                        fs_state = FileStreamState.save_as;
+                        popup_new.show();
+                    } else {
+                        root.save-current(root.pass_key );
+                    }
+                }
+            }
+            Button {
+                text: "Save As...";
+                clicked => {
+                    root.fs_state = FileStreamState.save_as;
                     popup_new.show();
-                } else {
-                    root.save-current(root.pass_key );
                 }
             }
         }
-        Button {
-            text: "Save As...";
-            clicked => {
-                root.fs_state = FileStreamState.save_as;
-                popup_new.show();
-            }
-        }
-    }
         txt_contents := TextEdit {
             font-size: 14px;
             edited => {
