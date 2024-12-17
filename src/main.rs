@@ -7,7 +7,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{self, Read, Write};
 use crypto::{encrypt, decrypt};
-use native_dialog::FileDialog;
+//use native_dialog::FileDialog;
 
 
 slint::include_modules!();
@@ -21,30 +21,25 @@ fn main() -> Result<(), Box<dyn Error>> {
         move |passkey| {
             let ui = ui_handle.unwrap();
             
-            // Get the path to save the file
-            if let Some(path) = FileDialog::new()
-                .set_location("~/Desktop")
+            // Get the path to save the file using rfd
+            let path = rfd::FileDialog::new()
+                .set_directory("~/Desktop")
                 .add_filter("Text File", &["txt"])
-                .show_save_single_file()
-                .unwrap()
-            {
+                .save_file();
+
+            if let Some(path) = path {
                 // The data we want to save
                 let new_contents = ui.get_contents();  //.clone().to_string();
 
                 // Encrypt the file
                 let encrypted_new_contents = encrypt(&new_contents, &passkey);
 
-                //Attempt to save the file
+                // Attempt to save the file
                 if let Err(e) = write_file(path.to_str().unwrap(), &encrypted_new_contents) {
                     eprintln!("Failed to save file: {}", e);
-                }           
-
-                // Refresh the UI
-                ui.set_contents(slint::SharedString::from(new_contents));
-                ui.set_file_path(slint::SharedString::from(path.to_str().unwrap()));
-
+                }
             } else {
-                eprintln!("No file path was selected.");
+                eprintln!("Failed to get the path to save the file.");
             }
         }
     });
@@ -82,23 +77,23 @@ fn main() -> Result<(), Box<dyn Error>> {
         move || {
             let ui = ui_handle.unwrap();
 
-            // Open the file dialog
-            let path = FileDialog::new()
-            .set_location("~/Desktop")
-            .add_filter("Text File", &["txt"])
-            .show_open_single_file()
-            .unwrap();
+            // Open the file dialog using rfd
+            let path = rfd::FileDialog::new()
+                .set_directory("~/Desktop")
+                .add_filter("Text File", &["txt"])
+                .pick_file();
 
             // This should only open the dialog and set the path for the UI, decryption is done next.
             if let Some(path) = path {
-
                 // Update the UI with file path
                 ui.set_file_path(slint::SharedString::from(path.display().to_string()));
 
                 // invoke popup window asking for passkey
                 let handle_copy = ui_handle.clone();
                 let _ = slint::invoke_from_event_loop(move || handle_copy.unwrap().invoke_show_popup_open());
-            }          
+            } else {
+                eprintln!("Failed to open file dialog.");
+            }
         }
     });
 

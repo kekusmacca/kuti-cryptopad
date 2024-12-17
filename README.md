@@ -28,14 +28,14 @@ cargo build
 ```
 or 
 ```bash
-cargoe build --release
+cargo build --release
 ```
 
 
 To run the app:
 
 ```bash
-./kuti-cryptopad
+cargo run
 ```
 
 ## Encryption Details

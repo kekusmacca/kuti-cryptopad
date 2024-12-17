@@ -24,7 +24,8 @@ rand = "0.8"
 pbkdf2 = "0.10"
 hmac = "0.12"
 sha2 = "0.10"
-native-dialog = "0.7.0"
+#native-dialog = "0.7.0"
+rfd = "0.15.1"
 
 [build-dependencies]
 slint-build = "1.8.0"
